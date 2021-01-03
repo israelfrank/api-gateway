@@ -62,6 +62,9 @@ pipeline {
       // run unit test using docker-compose
       stage('run unit tests') {   
         steps {
+          withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
+          }
           configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
             sh "docker-compose -f docker-compose.test.yaml --env-file ${env.API_CONFIG_FILE} up  --build --force-recreate --renew-anon-volumes --exit-code-from api-gateway"  
           } 
