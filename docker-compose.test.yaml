@@ -96,9 +96,11 @@ services:
       - ../kdrive.env
     ports:
       - 8088:8080
+    # depends_on: 
+    #   elasticsearch:
+    #     condition: service_healthy
     depends_on: 
-      elasticsearch:
-        condition: service_healthy
+      - elasticsearch
   gotenberg-service:
     image: bluehub.azurecr.io/meateam/gotenberg:6
     env_file:
