@@ -4,8 +4,6 @@ services:
     build:
         context: .
         dockerfile: test.Dockerfile
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     ports:
       - '8080:8080'
     depends_on:
@@ -28,24 +26,18 @@ services:
     command: server /data
   upload-service:
     image: 'bluehub.azurecr.io/meateam/upload-service:develop'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     depends_on:
       - minio
     ports:
       - '8081:8080'
   download-service:
     image: 'bluehub.azurecr.io/meateam/download-service:develop'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     ports:
       - '8082:8080'
     depends_on:
       - minio
   file-service:
     image: 'bluehub.azurecr.io/meateam/file-service:develop'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     ports:
       - '8083:8080'
     depends_on:
@@ -62,8 +54,6 @@ services:
     image: 'bluehub.azurecr.io/meateam/authentication-service:develop'
     ports:
       - '8084:8080'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     depends_on:
       - saml-idp
       - user-service
@@ -71,14 +61,10 @@ services:
     image: 'bluehub.azurecr.io/meateam/test-saml-idp:latest'
     ports:
       - '8085:8080'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
   user-service:
     image: 'bluehub.azurecr.io/meateam/user-service:develop'
     ports:
       - '8086:8080'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     depends_on:
       - mongo
       - redis
@@ -86,14 +72,10 @@ services:
     image: 'bluehub.azurecr.io/meateam/permission-service:develop'
     ports:
       - '8087:8080'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     depends_on:
       - mongo
   search-service:
     image: bluehub.azurecr.io/meateam/search-service:develop
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     ports:
       - 8088:8080
     # depends_on: 
@@ -103,8 +85,6 @@ services:
       - elasticsearch
   gotenberg-service:
     image: bluehub.azurecr.io/meateam/gotenberg:6
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     tmpfs:
       - /tmp
       - /gotenberg/tmp
@@ -112,8 +92,6 @@ services:
       - 8089:8080
   spike-service:
     image: bluehub.azurecr.io/meateam/spike-service:latest
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     depends_on:
       - redis
     ports:
@@ -122,12 +100,8 @@ services:
     image: bluehub.azurecr.io/meateam/delegation-service:develop
     ports:
       - '8091:8080'
-    env_file:
-      - "${env.API_CONFIG_FILE}"
   permit-service:
     image: bluehub.azurecr.io/meateam/permit-service:develop
-    env_file:
-      - "${env.API_CONFIG_FILE}"
     ports:
       - 8092:8080
     depends_on:
