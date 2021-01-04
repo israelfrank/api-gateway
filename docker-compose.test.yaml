@@ -68,7 +68,7 @@ services:
       - saml-idp
       - user-service
   saml-idp:
-    image: 'drivehub.azurecr.io/meateam/test-saml-idp:develop'
+    image: 'drivehub.azurecr.io/meateam/test-saml-idp:latest'
     ports:
       - '8085:8080'
     env_file:
