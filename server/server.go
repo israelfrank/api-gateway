@@ -72,7 +72,7 @@ func init() {
 	viper.SetDefault(configAllowOrigins, "http://localhost*")
 	viper.SetDefault(configSupportLink, "https://open.rocket.chat")
 	viper.SetDefault(configDropboxSupportLink, "https://open.rocket.chat")
-	viper.SetDefault(configElasticsearchURL, "http://elasticsearch:9200")
+	viper.SetDefault(configElasticsearchURL, "http://localhost:9200")
 	viper.SetDefault(configElasticsearchUser, "")
 	viper.SetDefault(configElasticsearchPassword, "")
 	viper.SetDefault(configElasticsearchIndex, "metrics")

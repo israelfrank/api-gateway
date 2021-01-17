@@ -23,7 +23,7 @@
         "GW_PERMIT_SERVICE": ":8092",
         "GW_GOTENBERG_SERVICE": "http://localhost:8089",
         "GW_WEB_UI": "http://localhost:8080",
-        "ELASTICSEARCH_URL": "http://elasticsearch:9200",
+        "ELASTICSEARCH_URL": "http://localhost:9200",
         "LOG_INDEX": "kdrive",
         "LOG_LEVEL": "info",
         "ELASTIC_APM_SERVER_URL": "http://localhost:8200",
