@@ -12,6 +12,10 @@ pipeline {
           containers: 
             - name: dind-slave
               image: aymdev/dind-compose 
+              resources: 
+                  requests: 
+                      cpu: 200m 
+                      memory: 4000Mi 
               securityContext: 
                   privileged: true 
               volumeMounts: 
