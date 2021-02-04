@@ -1,6 +1,7 @@
-version: '3'
+version: '2.1'
 services:
   api-gateway:
+    image: api-gateway
     build:
         context: .
         dockerfile: test.Dockerfile
@@ -83,7 +84,7 @@ services:
       - mongo
       - redis
   permission-service:
-    image: 'drivehub.azurecr.io/meateam/permission-service:develop'
+    image: 'drivehub.azurecr.io/meateam/permission-service:pagination'
     ports:
       - '8087:8080'
     env_file:
@@ -91,16 +92,11 @@ services:
     depends_on:
       - mongo
   search-service:
-    image: drivehub.azurecr.io/meateam/search-service:develop
+    image: 'drivehub.azurecr.io/meateam/search-service:develop'
     env_file:
       - ./kdrive.env
     ports:
-      - 8088:8080
-    # depends_on: 
-    #   elasticsearch:
-    #     condition: service_healthy
-    depends_on: 
-      - elasticsearch
+      - '8088:8080'
   gotenberg-service:
     image: drivehub.azurecr.io/meateam/gotenberg:6
     env_file:
@@ -148,8 +144,3 @@ services:
       interval: 5s
       timeout: 10s
       retries: 5
-  kibana:
-    image: docker.elastic.co/kibana/kibana:7.5.0
-    container_name: kibana
-    ports: ['5601:5601']
-    depends_on: ['elasticsearch']

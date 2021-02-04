@@ -12,10 +12,6 @@ pipeline {
           containers: 
             - name: dind-slave
               image: aymdev/dind-compose 
-              resources: 
-                  requests: 
-                      cpu: 200m 
-                      memory: 3500Mi 
               securityContext: 
                   privileged: true 
               volumeMounts: 
@@ -33,7 +29,41 @@ pipeline {
               emptyDir: {}
  """
     }
-  }   
+  }  
+
+//          kubernetes {
+//        defaultContainer 'dind-slave'  
+//        yaml """
+//       apiVersion: v1 
+//       kind: Pod 
+//       metadata: 
+//           name: k8s-worker
+//       spec: 
+//           containers: 
+//             - name: dind-slave
+//               image: aymdev/dind-compose 
+//               resources: 
+//                   requests: 
+//                       cpu: 100m 
+//                       memory: 512Mi 
+//               securityContext: 
+//                   privileged: true 
+//               volumeMounts: 
+//                 - name: docker-graph-storage 
+//                   mountPath: /var/lib/docker
+//             - name: kube-helm-slave
+//               image:  qayesodot/slave-jenkins:kube-helm
+//               securityContext:
+//                 allowPrivilegeEscalation: false
+//                 runAsUser: 0
+//               command: ["/bin/sh"]
+//               args: ["-c","while true; do echo hello; sleep 10;done"]            
+//           volumes: 
+//             - name: docker-graph-storage 
+//               emptyDir: {}
+//  """
+//     }
+ 
   stages {
       // this stage create enviroment variable from git for discored massage
       stage('get_commit_msg') {
@@ -96,7 +126,7 @@ pipeline {
       //            branch 'master'; branch 'develop'
       //         }
       //       }
-      //       steps{  
+      //       steps{  ouch yyy.txt
       //         withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
       //           sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
       //         }
