@@ -34,39 +34,6 @@ pipeline {
  """
     }
   }  
-
-//          kubernetes {
-//        defaultContainer 'dind-slave'  
-//        yaml """
-//       apiVersion: v1 
-//       kind: Pod 
-//       metadata: 
-//           name: k8s-worker
-//       spec: 
-//           containers: 
-//             - name: dind-slave
-//               image: aymdev/dind-compose 
-//               resources: 
-//                   requests: 
-//                       cpu: 100m 
-//                       memory: 512Mi 
-//               securityContext: 
-//                   privileged: true 
-//               volumeMounts: 
-//                 - name: docker-graph-storage 
-//                   mountPath: /var/lib/docker
-//             - name: kube-helm-slave
-//               image:  qayesodot/slave-jenkins:kube-helm
-//               securityContext:
-//                 allowPrivilegeEscalation: false
-//                 runAsUser: 0
-//               command: ["/bin/sh"]
-//               args: ["-c","while true; do echo hello; sleep 10;done"]            
-//           volumes: 
-//             - name: docker-graph-storage 
-//               emptyDir: {}
-//  """
-//     }
  
   stages {
       // this stage create enviroment variable from git for discored massage
@@ -101,8 +68,7 @@ pipeline {
           }
           configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
-            sh "docker-compose -f docker-compose.test.yaml up" 
-              // sh "docker-compose -f docker-compose.test.yaml up  --build --force-recreate --renew-anon-volumes --exit-code-from api-gateway" 
+              sh "docker-compose -f docker-compose.test.yaml up --build --exit-code-from api-gateway" 
             sh "rm kdrive.env" 
           } 
         }
