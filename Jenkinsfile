@@ -70,8 +70,8 @@ pipeline {
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
             sh "docker-compose -f docker-compose.test.yaml up --build -d" 
             script {
-                if(docker inspect --format='{{.State.ExitCode}}' api-gateway_api-gateway_1 != 0 ) {  
-                  docker-compose logs api-gateway
+                if(sh "docker inspect --format='{{.State.ExitCode}}' api-gateway_api-gateway_1" != 0 ) {  
+                  sh "docker-compose logs api-gateway"
                 }
             }
             sh "rm kdrive.env" 
@@ -101,7 +101,7 @@ pipeline {
       //            branch 'master'; branch 'develop'
       //         }
       //       }
-      //       steps{  ouch yyy.txt
+      //       steps{
       //         withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
       //           sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
       //         }
