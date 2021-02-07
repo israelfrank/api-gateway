@@ -12,7 +12,7 @@ services:
     depends_on:
       - upload-service
       - download-service
-      # - file-service
+      - file-service
       - authentication-service
       - permission-service
       - search-service
@@ -43,14 +43,14 @@ services:
       - '8082:8080'
     depends_on:
       - minio
-  # file-service:
-  #   image: 'drivehub.azurecr.io/meateam/file-service:develop'
-  #   env_file:
-  #     - ./kdrive.env
-  #   ports:
-  #     - '8083:8080'
-  #   depends_on:
-  #     - mongo
+  file-service:
+    image: 'drivehub.azurecr.io/meateam/file-service:develop'
+    env_file:
+      - ./kdrive.env
+    ports:
+      - '8083:8080'
+    depends_on:
+      - mongo
   mongo:
     image: 'mongo:4.0.9'
     ports:
