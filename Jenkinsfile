@@ -15,7 +15,7 @@ pipeline {
               resources: 
                   requests: 
                       cpu: 600m 
-                      memory: 6000Mi 
+                      memory: 4000Mi 
               securityContext: 
                   privileged: true 
               volumeMounts: 
