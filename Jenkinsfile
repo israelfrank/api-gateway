@@ -68,7 +68,12 @@ pipeline {
           }
           configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
-              sh "docker-compose -f docker-compose.test.yaml up --build --exit-code-from api-gateway" 
+            sh "docker-compose -f docker-compose.test.yaml up --build -d" 
+            script {
+                if(docker inspect --format='{{.State.ExitCode}}' api-gateway_api-gateway_1 != 0 ) {  
+                  docker-compose logs api-gateway
+                }
+            }
             sh "rm kdrive.env" 
           } 
         }
