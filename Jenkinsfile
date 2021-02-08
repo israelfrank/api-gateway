@@ -71,7 +71,7 @@ pipeline {
             sh "docker-compose -f docker-compose.test.yaml up --build -d" 
             script {
             env.CONTAINER_NAME = sh """#!/bin/bash
-            env.CONTAINER_NAME = docker-compose ps | grep _api-gateway_1 | awk '{print $1}'
+            env.CONTAINER_NAME = docker-compose ps | grep _api-gateway_1 | awk '{print ${$1}}'
             """, returnStdout: true.trim()
 
               // env.CONTAINER_NAME = sh (script: "docker-compose ps | grep _api-gateway_1 | awk '{ print ${$1}}'", returnStdout: true).trim()
