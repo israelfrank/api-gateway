@@ -54,45 +54,47 @@ pipeline {
             env.JOB_WITHOUT_BRANCH = sh([script: "echo ${env.JOB_PATH} | sed 's;${BRANCH_FOR_URL};'';g'", returnStdout: true]).trim() 
             //  creating variable that contain the JOB_WITHOUT_BRANCH variable without the last 3 characters 
             env.JOB_FOR_URL = sh([script: "echo ${JOB_WITHOUT_BRANCH}|rev | cut -c 4- | rev", returnStdout: true]).trim()  
-            echo "${env.JOB_FOR_URL}" 
+            echo "${env.GIT_BRANCH}" 
+            echo "${env.JOB_NAME}" 
+            echo "${env.JOB_PATH}" 
           }
         }
       }
     } 
 
       // run unit test using docker-compose
-      stage('run unit tests') {   
-        steps {
-          withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
-          }
-          configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
-            sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
-            sh "docker-compose -f docker-compose.test.yaml up --build -d" 
-            script {
-            env.CONTAINER_NAME = sh """#!/bin/bash
-            env.CONTAINER_NAME = docker-compose ps | grep _api-gateway_1 | awk '{print ${$1}}'
-            """, returnStdout: true.trim()
+      // stage('run unit tests') {   
+      //   steps {
+      //     withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+      //           sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
+      //     }
+      //     configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
+      //       sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
+      //       sh "docker-compose -f docker-compose.test.yaml up --build -d" 
+      //       script {
+      //       env.CONTAINER_NAME = sh """#!/bin/bash
+      //       env.CONTAINER_NAME = docker-compose ps | grep _api-gateway_1 | awk '{print ${$1}}'
+      //       """, returnStdout: true.trim()
 
-              // env.CONTAINER_NAME = sh (script: "docker-compose ps | grep _api-gateway_1 | awk '{ print ${$1}}'", returnStdout: true).trim()
-               sh (" echo ${env.CONTAINER_NAME}") 
-                if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_NAME}") != 0 ) {  
-                  sh ("docker logs ${env.CONTAINER_NAME}")
+      //         // env.CONTAINER_NAME = sh (script: "docker-compose ps | grep _api-gateway_1 | awk '{ print ${$1}}'", returnStdout: true).trim()
+      //          sh (" echo ${env.CONTAINER_NAME}") 
+      //           if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_NAME}") != 0 ) {  
+      //             sh ("docker logs ${env.CONTAINER_NAME}")
                     
-                    // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-                    // sh "exit 1"
-                    // }
-                }
-            }
-            sh "rm kdrive.env" 
-          } 
-        }
+      //               // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+      //               // sh "exit 1"
+      //               // }
+      //           }
+      //       }
+      //       sh "rm kdrive.env" 
+      //     } 
+      //   }
         // post {
         //   always {
         //     discordSend description: '**service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/blue/organizations/jenkins/'+env.JOB_FOR_URL+'/detail/'+env.BRANCH_FOR_URL+'/'+env.BUILD_NUMBER+'/pipeline', result: currentBuild.result, thumbnail: '', title: ' link to logs of unit test', webhookURL: env.discord   
         //   }
         // }
-      }
+      // }
       // build images unit tests and system
       // stage('build image of test and system') {
       //   parallel {
