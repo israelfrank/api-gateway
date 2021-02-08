@@ -69,7 +69,8 @@ pipeline {
           configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
 
-            sh "docker-compose -f docker-compose.test.yaml up --build" 
+            sh "docker-compose -f docker-compose.test.yaml up --build -d" 
+            sh "sleep 5m"
             script {
               env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=_api-gateway_1", returnStdout: true).trim()
                sh (" echo ${env.CONTAINER_ID}") 
