@@ -68,16 +68,13 @@ pipeline {
           }
           configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
-            sh "docker-compose -f docker-compose.test.yaml up --build --exit-code-from api-gateway" 
-            // script {
-            // env.CONTAINER_NAME = sh """#!/bin/bash
-            // env.CONTAINER_NAME = docker-compose ps | grep _api-gateway_1 | awk '{print ${$1}}'
-            // """, returnStdout: true.trim()
 
-            //   // env.CONTAINER_NAME = sh (script: "docker-compose ps | grep _api-gateway_1 | awk '{ print ${$1}}'", returnStdout: true).trim()
-            //    sh (" echo ${env.CONTAINER_NAME}") 
-            //     if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_NAME}") != 0 ) {  
-            //       sh ("docker logs ${env.CONTAINER_NAME}")
+            sh "docker-compose -f docker-compose.test.yaml up --build -d" 
+            script {
+              env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=_api-gateway_1", returnStdout: true).trim()
+               sh (" echo ${env.CONTAINER_ID}") 
+                if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_ID}") != 0 ) {  
+                  sh ("docker logs ${env.CONTAINER_ID}")
                     
             //         // catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
             //         // sh "exit 1"
