@@ -70,8 +70,12 @@ pipeline {
             sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
             sh "docker-compose -f docker-compose.test.yaml up --build -d" 
             script {
-                if(sh ("docker inspect --format='{{.State.ExitCode}}' api-gateway_api-gateway_1") != 0 ) {  
-                  sh ("docker-compose logs api-gateway")
+              env.CONTAINER_NAME = sh (script: 'docker-compose ps | grep _api-gateway_1', returnStdout: true).trim()
+                if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_NAME}") != 0 ) {  
+                  sh ("docker logs ${env.CONTAINER_NAME}")
+                    
+                    catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+                    sh "exit 1"
                 }
             }
             sh "rm kdrive.env" 
