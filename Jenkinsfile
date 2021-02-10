@@ -269,8 +269,9 @@ pipeline {
               // env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
               env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-develop.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
               if("${env.APP}" == '200'){
-
+            try {
                 sh ("docker run --name drive-outomation qayesodot/drive-outomation")
+                
                 env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
                 sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
                 sh("cat ./reports.html")
@@ -284,11 +285,26 @@ pipeline {
                 reportName: 'aoutomation test report'
                 ]          
               }
-              else{
-                sh ("drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ not found")
+              catch(all){
+                env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
+                sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
+                sh("cat ./reports.html")
+
+                publishHTML target: [
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: true,
+                reportDir: "./",
+                reportFiles: 'reports.html',
+                reportName: 'aoutomation test report'
+                ]          
               }
             }
+            else{
+                sh ("drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ not found")
+            }
           }
+        }
       } 
   }
 }   
