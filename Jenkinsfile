@@ -265,8 +265,9 @@ pipeline {
           // }
           steps {
             script{
-              // env.APP = sh (script: "curl -o -I -L -s -w '%{http_code}' drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
-              env.APP = sh (script: "curl -o -I -L -s -w '%{http_code}' drive-develop.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
+               env.APP1 = sh (script: "curl -o -I -L -s -w '%{http_code}' drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
+               sh ("echo ${env.APP1}")
+              env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-develop.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
               if("${env.APP}" == '200'){
 
                 sh ("docker run --name drive-outomation qayesodot/drive-outomation")
