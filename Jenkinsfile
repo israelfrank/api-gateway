@@ -234,6 +234,7 @@ pipeline {
         steps {
           container('kube-helm-slave'){
             unstash 'kdHelmRepo'
+        script{
           if(env.BRANCH_NAME == 'master'){ 
              sh([script: """
              (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ ) 
@@ -246,6 +247,7 @@ pipeline {
              ||(./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-develop --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com)
             """])
           }
+        }
           sh "apk --no-cache add curl && curl -I drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/"
         }
       }
