@@ -45,7 +45,7 @@ pipeline {
             env.GIT_SHORT_COMMIT = sh(returnStdout: true, script: "git log -n 1 --pretty=format:'%h'").trim()
             env.GIT_COMMITTER_EMAIL = sh (script: "git --no-pager show -s --format='%ae'", returnStdout: true  ).trim()
             env.GIT_REPO_NAME = scm.getUserRemoteConfigs()[0].getUrl().tokenize('/')[3].split("\\.")[0]
-            echo "${env.GIT_REPO_NAME}"
+
             // Takes the branch name and replaces the slashes with the %2F mark 
             env.BRANCH_FOR_URL = sh([script: "echo ${GIT_BRANCH} | sed 's;/;%2F;g'", returnStdout: true]).trim()
             // Takes the job path variable and replaces the slashes with the %2F mark 
@@ -55,44 +55,45 @@ pipeline {
             //  creating variable that contain the JOB_WITHOUT_BRANCH variable without the last 3 characters 
             env.JOB_FOR_URL = sh([script: "echo ${JOB_WITHOUT_BRANCH}|rev | cut -c 4- | rev", returnStdout: true]).trim()  
             echo "${env.JOB_FOR_URL}" 
+            echo "${env.BRANCH_TAG_NAME}"
           }
         }
       }
     } 
 
       // run unit test using docker-compose
-    //   stage('run unit tests') {   
-    //     steps {
-    //       withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-    //             sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
-    //       }
-    //       configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
-    //         sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
+      // stage('run unit tests') {   
+      //   steps {
+      //     withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+      //           sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
+      //     }
+      //     configFileProvider([configFile(fileId:'d9e51ae8-06c8-4dc4-ba0d-d4794033bddd',variable:'API_CONFIG_FILE')]){
+      //       sh "cp ${env.API_CONFIG_FILE} ./kdrive.env" 
 
-    //         sh "docker-compose -f docker-compose.test.yaml up --build -d" 
-    //         sh "sleep 5m"
-    //         script {
-    //           env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=_api-gateway_1", returnStdout: true).trim()
-    //            sh (" echo ${env.CONTAINER_ID}") 
-    //             if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_ID}") == 0 ) {  
-    //               sh ("docker logs ${env.CONTAINER_ID}")
-    //             }
-    //             else {
-    //                sh ("docker logs ${env.CONTAINER_ID}")
-    //                 catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
-    //                 sh "exit 1"
-    //                 }
-    //             }                     
-    //         }
-    //         sh "rm kdrive.env" 
-    //       } 
-    //     }
-    //     post {
-    //       always {
-    //         discordSend description: '**service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/blue/organizations/jenkins/'+env.JOB_FOR_URL+'/detail/'+env.BRANCH_FOR_URL+'/'+env.BUILD_NUMBER+'/pipeline', result: currentBuild.result, thumbnail: '', title: ' link to logs of unit test', webhookURL: env.discord   
-    //       }
-    //     }
-    //   }
+      //       sh "docker-compose -f docker-compose.test.yaml up --build -d" 
+      //       sh "sleep 10m"
+      //       script {
+      //         env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=_api-gateway_1", returnStdout: true).trim()
+      //          sh (" echo ${env.CONTAINER_ID}") 
+      //           if(sh ("docker inspect --format='{{.State.ExitCode}}' ${env.CONTAINER_ID}") == 0 ) {  
+      //             sh ("docker logs ${env.CONTAINER_ID}")
+      //           }
+      //           else {
+      //              sh ("docker logs ${env.CONTAINER_ID}")
+      //               catchError(buildResult: 'SUCCESS', stageResult: 'FAILURE') {
+      //               sh "exit 1"
+      //               }
+      //           }                     
+      //       }
+      //       sh "rm kdrive.env" 
+      //     } 
+      //   }
+      //   post {
+      //     always {
+      //       discordSend description: '**service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/blue/organizations/jenkins/'+env.JOB_FOR_URL+'/detail/'+env.BRANCH_FOR_URL+'/'+env.BUILD_NUMBER+'/pipeline', result: currentBuild.result, thumbnail: '', title: ' link to logs of unit test', webhookURL: env.discord   
+      //     }
+      //   }
+      // }
     //     // login to acr when pushed to branch master or develop 
     //     stage('login to azure container registry') {
     //       when {
