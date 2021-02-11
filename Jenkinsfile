@@ -55,7 +55,7 @@ pipeline {
             //  creating variable that contain the JOB_WITHOUT_BRANCH variable without the last 3 characters 
             env.JOB_FOR_URL = sh([script: "echo ${JOB_WITHOUT_BRANCH}|rev | cut -c 4- | rev", returnStdout: true]).trim()  
             echo "${env.JOB_FOR_URL}" 
-            echo "${env.BRANCH_TAG_NAME}"
+            echo "${env.BRANCH_NAME}"
           }
         }
       }
