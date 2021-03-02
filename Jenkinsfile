@@ -144,13 +144,13 @@ pipeline {
             // sh("kubectl get ns ${env.BRANCH_NAME} || kubectl create ns ${env.BRANCH_NAME}")
             sleep(10)
 
+          script {
             //add 
+            sh("kubectl get ns test1 || kubectl create ns test1")
             withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
                 sh ("kubectl get secrets acr-secret --namespace test1 || kubectl create secret docker-registry acr-secret --docker-username=${USER} --docker-password=${PASS}  --docker-server=https://drivehub.azurecr.io --namespace test1")
             } 
-            sh("kubectl get ns test1 || kubectl create ns test1")
 
-          script {
               configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
               sh ("kubectl apply -f test1")   
               }  
