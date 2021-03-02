@@ -199,7 +199,9 @@ pipeline {
       }
       post {
         always {
-            stash includes: '../kd-helm/**/*', name: 'kdHelmRepo'
+            sh "pwd"
+            sh "ls" 
+            stash includes: './kd-helm/**/*', name: 'kdHelmRepo'
         } 
       }
     }
