@@ -152,7 +152,7 @@ pipeline {
             } 
 
               configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
-              sh ("kubectl apply -f test1")   
+              sh ("kubectl apply -f ${env.MASTER_CONFIG_FILE}")   
               }  
             // if(env.BRANCH_NAME == 'master') {
             //   configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
