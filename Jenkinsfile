@@ -216,6 +216,7 @@ pipeline {
         steps {
           container('kube-helm-slave'){
             unstash 'kdHelmRepo'
+            sh "ls"
         script{
 
           // add 
