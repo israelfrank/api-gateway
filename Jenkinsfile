@@ -152,10 +152,10 @@ pipeline {
             } 
             sh("kubectl get ns test1 || kubectl create ns test1")
 
-            configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
-            sh ("kubectl apply -f test1")   
-            }  
           script {
+              configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
+              sh ("kubectl apply -f test1")   
+              }  
             // if(env.BRANCH_NAME == 'master') {
             //   configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
             //   sh ("kubectl apply -f ${env.MASTER_CONFIG_FILE}")  
