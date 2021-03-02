@@ -146,8 +146,6 @@ pipeline {
 
             //add 
             withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-              sh "docker login drivehub.azurecr.io -u ${USER} -p ${PASS}"
-
                 sh ("kubectl get secrets acr-secret --namespace test1 || kubectl create secret docker-registry acr-secret --docker-username=${USER} --docker-password=${PASS}  --docker-server=https://drivehub.azurecr.io --namespace test1")
             } 
             sh("kubectl get ns test1 || kubectl create ns test1")
