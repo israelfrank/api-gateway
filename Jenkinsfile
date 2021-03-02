@@ -201,7 +201,7 @@ pipeline {
         always {
             sh "pwd"
             sh "ls" 
-            stash includes: './kd-helm/**/*', name: 'kdHelmRepo'
+            stash includes: './**/*', name: 'kdHelmRepo'
         } 
       }
     }
