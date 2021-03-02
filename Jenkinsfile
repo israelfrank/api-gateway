@@ -200,8 +200,8 @@ pipeline {
       post {
         always {
             sh "pwd"
-            sh "ls" 
-            stash includes: '../**/*', name: 'kdHelmRepo'
+            sh "pwd" 
+            stash includes: '**/**/*', name: 'kdHelmRepo'
         } 
       }
     }
