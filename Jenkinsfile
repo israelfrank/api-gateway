@@ -217,6 +217,7 @@ pipeline {
         script{
 
           // add 
+          sh ("cat /home/blue/.kube/config")
             sh([script: """
             (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) || 
             (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
