@@ -199,8 +199,6 @@ pipeline {
       }
       post {
         always {
-            sh "pwd"
-            sh "pwd" 
             stash includes: '**/**/*', name: 'kdHelmRepo'
         } 
       }
@@ -216,7 +214,6 @@ pipeline {
         steps {
           container('kube-helm-slave'){
             unstash 'kdHelmRepo'
-            sh "ls"
         script{
 
           // add 
