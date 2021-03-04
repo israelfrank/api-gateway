@@ -216,6 +216,9 @@ pipeline {
           steps{
             container('kube-helm-slave'){
               script {
+                sh("helm init --client-only --skip-refresh")
+                sh("helm repo rm stable")
+                sh("helm repo add stable https://charts.helm.sh/stable") 
                 sh([script: """
                 helm get ingress-test1 || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
                 helm repo update && 
@@ -246,7 +249,7 @@ pipeline {
           }
         }
 
-        
+
     // this stage update the helm-chart packages and deploy or upgrade the drive-app to k8s , depends if drive-app is already deployed on the cluster 
       stage('deploy app'){
         // when {
@@ -260,9 +263,6 @@ pipeline {
         script{
 
           // add 
-            sh("helm init --client-only --skip-refresh")
-            sh("helm repo rm stable")
-            sh("helm repo add stable https://charts.helm.sh/stable") 
             sh([script: """
             (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) || 
             (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
