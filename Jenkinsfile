@@ -206,8 +206,46 @@ pipeline {
       }
     }
 
+    // this stage update the helm-chart packages and deploy or upgrade the drive-app to k8s , depends if drive-app is already deployed on the cluster 
+      stage('deploy app'){
+        // when {
+        //   anyOf {
+        //     branch 'master'; branch 'develop'
+        //   }
+        // }
+        steps {
+          container('kube-helm-slave'){
+            unstash 'kdHelmRepo'
+        script{
 
-        stage('create and configure ingress under current namespace'){
+          // add 
+            sh("helm init --client-only --skip-refresh")
+            sh("helm repo rm stable")
+            sh("helm repo add stable https://charts.helm.sh/stable") 
+            sh([script: """
+            (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) || 
+            (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
+           """])
+
+          // if(env.BRANCH_NAME == 'master'){ 
+          //    sh([script: """
+          //    (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) 
+          //    ||(./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
+          //   """])
+          // }
+          // else {
+          //    sh([script: """
+          //    (helm get drive-develop && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-develop ./helm-chart/ --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com) 
+          //    ||(./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-develop --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com)
+          //   """])
+          // }
+        }
+          // sh "apk --no-cache add curl && curl -I drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/"
+        }
+      }
+    }
+
+    stage('create and configure ingress under current namespace'){
           //  when {
           //    anyOf {
           //     branch 'master'; branch 'develop'
@@ -216,9 +254,6 @@ pipeline {
           steps{
             container('kube-helm-slave'){
               script {
-                sh("helm init --client-only --skip-refresh")
-                sh("helm repo rm stable")
-                sh("helm repo add stable https://charts.helm.sh/stable") 
                 sh([script: """
                 helm get ingress-test1 || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
                 helm repo update && 
@@ -250,41 +285,6 @@ pipeline {
         }
 
 
-    // this stage update the helm-chart packages and deploy or upgrade the drive-app to k8s , depends if drive-app is already deployed on the cluster 
-      stage('deploy app'){
-        // when {
-        //   anyOf {
-        //     branch 'master'; branch 'develop'
-        //   }
-        // }
-        steps {
-          container('kube-helm-slave'){
-            unstash 'kdHelmRepo'
-        script{
-
-          // add 
-            sh([script: """
-            (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) || 
-            (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
-           """])
-
-          // if(env.BRANCH_NAME == 'master'){ 
-          //    sh([script: """
-          //    (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) 
-          //    ||(./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
-          //   """])
-          // }
-          // else {
-          //    sh([script: """
-          //    (helm get drive-develop && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-develop ./helm-chart/ --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com) 
-          //    ||(./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-develop --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com)
-          //   """])
-          // }
-        }
-          // sh "apk --no-cache add curl && curl -I drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/"
-        }
-      }
-    }
 
       // runing end to end aoutomation testing and publish test results 
       // stage('aoutomation testing'){
