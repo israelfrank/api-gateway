@@ -193,7 +193,7 @@ pipeline {
         }
           sh "sed -i '29 i 2345678      ${env.space2}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml"
           sh "sed -i '30 i 2345678        ${env.space1}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml" 
-          sh "sed -i 's;{{ .Values.image.tag }};develop;g' ./common/templates/_deployment.yaml"
+          sh "sed -i 's;{{ .Values.image.tag }};${env.BRANCH_NAME};g' ./common/templates/_deployment.yaml"
           sh "sed -i 's;apps/v1beta2;apps/v1;g' ./common/templates/_deployment.yaml"
           sh "sed -i 's;apps/v1beta2;apps/v1;g' ./gotenberg/templates/deployment.yaml"
           sh 'cat common/templates/_deployment.yaml'
@@ -251,6 +251,11 @@ pipeline {
           //     branch 'master'; branch 'develop'
           //   }
           // }
+          environment {
+              DEVELOP_IP = credentials('DEVELOP_IP')
+              MASTER_IP = credentials('MASTER_IP')      
+          }
+
           steps{
             container('kube-helm-slave'){
               script {
@@ -259,7 +264,7 @@ pipeline {
                 helm repo update && 
                 helm install --name ingress-test1 ingress-nginx/ingress-nginx --namespace test1 \
                 --set controller.replicaCount=2 --set controller.nodeSelector."beta\\.kubernetes\\.io/os"=linux \
-                --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=20.54.101.163)
+                --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=$MASTER_IP)
                 """])
 
               // if(env.BRANCH_NAME == 'master'){ 
