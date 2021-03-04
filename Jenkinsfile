@@ -219,7 +219,9 @@ pipeline {
         script{
 
           // add 
-          //helm repo add "stable" "https://charts.helm.sh/stable" 
+            sh("helm init --client-only --skip-refresh")
+            sh("helm repo rm stable")
+            sh("helm repo add stable https://charts.helm.sh/stable") 
             sh([script: """
             (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) || 
             (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace test1 --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
