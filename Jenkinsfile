@@ -133,186 +133,193 @@ pipeline {
     //       }     
 
     //  ---- CD section ---- 
-    stage('create nameSpace,secrets and configMap in the cluster') {
-        when {
-          anyOf {
-            branch 'master'; branch 'develop'
-          }
-        }
-        steps {
-          container('kube-helm-slave'){
-            sh "kubectl get ns ${env.BRANCH_NAME} || kubectl create ns ${env.BRANCH_NAME}"
-            sleep(10)
-          script {
-            withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                sh ("kubectl get secrets acr-secret --namespace ${env.BRANCH_NAME} || kubectl create secret docker-registry acr-secret --docker-username=${USER} --docker-password=${PASS}  --docker-server=https://drivehub.azurecr.io --namespace ${env.BRANCH_NAME}")
-            } 
-            if(env.BRANCH_NAME == 'master') {
-              configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
-              sh ("kubectl apply -f ${env.MASTER_CONFIG_FILE}")  
-              }    
-            }
-            else{
-               configFileProvider([configFile(fileId:'abda1ce7-3925-4759-88a7-5163bdb44382',variable:'DEVELOP_CONFIG_FILE')]){
-                   sh ("kubectl apply -f ${env.DEVELOP_CONFIG_FILE}")  
-              }
-            }
-          }
-        }
-      }
-    }
+    // stage('create nameSpace,secrets and configMap in the cluster') {
+    //     when {
+    //       anyOf {
+    //         branch 'master'; branch 'develop'
+    //       }
+    //     }
+    //     steps {
+    //       container('kube-helm-slave'){
+    //         sh "kubectl get ns ${env.BRANCH_NAME} || kubectl create ns ${env.BRANCH_NAME}"
+    //         sleep(10)
+    //       script {
+    //         withCredentials([usernamePassword(credentialsId:'DRIVE_ACR',usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+    //             sh ("kubectl get secrets acr-secret --namespace ${env.BRANCH_NAME} || kubectl create secret docker-registry acr-secret --docker-username=${USER} --docker-password=${PASS}  --docker-server=https://drivehub.azurecr.io --namespace ${env.BRANCH_NAME}")
+    //         } 
+    //         if(env.BRANCH_NAME == 'master') {
+    //           configFileProvider([configFile(fileId:'34e71bc6-8b5d-4e31-8d6e-92d991802dcb',variable:'MASTER_CONFIG_FILE')]){
+    //           sh ("kubectl apply -f ${env.MASTER_CONFIG_FILE}")  
+    //           }    
+    //         }
+    //         else{
+    //            configFileProvider([configFile(fileId:'abda1ce7-3925-4759-88a7-5163bdb44382',variable:'DEVELOP_CONFIG_FILE')]){
+    //                sh ("kubectl apply -f c${env.DEVELOP_CONFIG_FILE}")  
+    //           }
+    //         }
+    //       }
+    //     }
+    //   }
+    // }
 
-    stage('clone kd-helm reposetory and inject imagePullSecrets block, and replace image tag in common/deployments file'){
-      when {
-        anyOf {
-          branch 'master'; branch 'develop'
-        }
-      }
-      steps {
-         container('jnlp'){
-          git branch: 'develop',
-            credentialsId: 'gitHubToken',
-            url: 'https://github.com/meateam/kd-helm.git'
-            sh 'cat common/templates/_deployment.yaml'
+    // stage('clone kd-helm reposetory and inject imagePullSecrets block, and replace image tag in common/deployments file'){
+    //   when {
+    //     anyOf {
+    //       branch 'master'; branch 'develop'
+    //     }
+    //   }
+    //   steps {
+    //      container('jnlp'){
+    //       git branch: 'develop',
+    //         credentialsId: 'gitHubToken',
+    //         url: 'https://github.com/meateam/kd-helm.git'
+    //         sh 'cat common/templates/_deployment.yaml'
 
-        script {
-            env.space1 = "- name: acr-secret"
-            env.space2 = "imagePullSecrets:"
-        }
-          sh "sed -i '29 i 2345678      ${env.space2}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml"
-          sh "sed -i '30 i 2345678        ${env.space1}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml" 
-          sh "sed -i 's;{{ .Values.image.tag }};develop;g' ./common/templates/_deployment.yaml"
-          sh "sed -i 's;apps/v1beta2;apps/v1;g' ./common/templates/_deployment.yaml"
-          sh "sed -i 's;apps/v1beta2;apps/v1;g' ./gotenberg/templates/deployment.yaml"
-          sh 'cat common/templates/_deployment.yaml'
-        }
-      }
-      post {
-        always {
-            stash includes: '**/**/*', name: 'kdHelmRepo'
-        } 
-      }
-    }
+    //     script {
+    //         env.space1 = "- name: acr-secret"
+    //         env.space2 = "imagePullSecrets:"
+    //     }
+    //       sh "sed -i '29 i 2345678      ${env.space2}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml"
+    //       sh "sed -i '30 i 2345678        ${env.space1}' ./common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml" 
+    //       sh "sed -i 's;{{ .Values.image.tag }};develop;g' ./common/templates/_deployment.yaml"
+    //       sh "sed -i 's;apps/v1beta2;apps/v1;g' ./common/templates/_deployment.yaml"
+    //       sh "sed -i 's;apps/v1beta2;apps/v1;g' ./gotenberg/templates/deployment.yaml"
+    //       sh 'cat common/templates/_deployment.yaml'
+    //     }
+    //   }
+    //   post {
+    //     always {
+    //         stash includes: '**/**/*', name: 'kdHelmRepo'
+    //     } 
+    //   }
+    // }
 
     // this stage update the helm-chart packages and deploy or upgrade the drive-app to k8s , depends if drive-app is already deployed on the cluster 
-      stage('deploy app'){
-        when {
-          anyOf {
-            branch 'master'; branch 'develop'
-          }
-        }
-        steps {
-          container('kube-helm-slave'){
-            unstash 'kdHelmRepo'
-          script{
-            sh("helm init --client-only --skip-refresh")
-            sh("helm repo rm stable")
-            sh("helm repo add stable https://charts.helm.sh/stable") 
+    //   stage('deploy app'){
+    //     when {
+    //       anyOf {
+    //         branch 'master'; branch 'develop'
+    //       }
+    //     }
+    //     steps {
+    //       container('kube-helm-slave'){
+    //         unstash 'kdHelmRepo'
+    //       script{
+    //         sh("helm init --client-only --skip-refresh")
+    //         sh("helm repo rm stable")
+    //         sh("helm repo add stable https://charts.helm.sh/stable") 
 
-          if(env.BRANCH_NAME == 'master'){ 
-             sh([script: """
-             (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com) ||
-             (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
-            """])
-          }
-          else {
-             sh([script: """
-             (helm get drive-develop && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-develop ./helm-chart/ --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com) ||
-             (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-develop --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com)
-            """])
-          }
-          }
-        }
-      }
-    }
+    //       if(env.BRANCH_NAME == 'master'){ 
+    //          sh([script: """
+    //          (helm get drive-master && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-master ./helm-chart/ --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com --recreate-pods) ||
+    //          (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-master --namespace master --set global.ingress.hosts[0]=drive-master.northeurope.cloudapp.azure.com)
+    //         """])
+    //       }
+    //       else {
+    //          sh([script: """
+    //          (helm get drive-develop && ./helm-dep-up-umbrella.sh ./helm-chart/ && helm upgrade drive-develop ./helm-chart/ --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com --recreate-pods) ||
+    //          (./helm-dep-up-umbrella.sh ./helm-chart/ && helm install ./helm-chart/ --name drive-develop --namespace develop --set global.ingress.hosts[0]=drive-develop.northeurope.cloudapp.azure.com)
+    //         """])
+    //       }
+    //       }
+    //     }
+    //   }
+    // }
 
-    stage('create and configure ingress under current namespace'){
-           when {
-             anyOf {
-              branch 'master'; branch 'develop'
-            }
-          }
-          environment {
-              DEVELOP_IP = credentials('DEVELOP_IP')
-              MASTER_IP = credentials('MASTER_IP')      
-          }
+    // stage('create and configure ingress under current namespace'){
+    //        when {
+    //          anyOf {
+    //           branch 'master'; branch 'develop'
+    //         }
+    //       }
+    //       environment {
+    //           DEVELOP_IP = credentials('DEVELOP_IP')
+    //           MASTER_IP = credentials('MASTER_IP')      
+    //       }
 
-          steps{
-            container('kube-helm-slave'){
-              script {
-                if(env.BRANCH_NAME == 'master'){ 
-                  sh([script: """
-                  helm get ingress-master || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
-                  helm repo update && 
-                  helm install --name ingress-master ingress-nginx/ingress-nginx --namespace master \
-                  --set controller.replicaCount=2 --set controller.nodeSelector."beta\\.kubernetes\\.io/os"=linux \
-                  --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=$MASTER_IP)
-                  """])
-                } else {
-                  sh([script: """
-                  helm get ingress-develop || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
-                  helm repo update && 
-                  helm install --name ingress-develop ingress-nginx/ingress-nginx --namespace master \
-                  --set controller.replicaCount=2 --set controller.nodeSelector."beta\\.kubernetes\\.io/os"=linux \
-                  --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=$DEVELOP_IP)
-                  """])
-                }
-              }
-            }
-          }
-        }
+    //       steps{
+    //         container('kube-helm-slave'){
+    //           script {
+    //             if(env.BRANCH_NAME == 'master'){ 
+    //               sh([script: """
+    //               helm get ingress-master || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
+    //               helm repo update && 
+    //               helm install --name ingress-master ingress-nginx/ingress-nginx --namespace master \
+    //               --set controller.replicaCount=2 --set controller.nodeSelector."beta\\.kubernetes\\.io/os"=linux \
+    //               --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=$MASTER_IP)
+    //               """])
+    //             } else {
+    //               sh([script: """
+    //               helm get ingress-develop || (helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx && 
+    //               helm repo update && 
+    //               helm install --name ingress-develop ingress-nginx/ingress-nginx --namespace master \
+    //               --set controller.replicaCount=2 --set controller.nodeSelector."beta\\.kubernetes\\.io/os"=linux \
+    //               --set defaultBackend.nodeSelector."beta\\.kubernetes\\.io/os"=linux --set controller.service.loadBalancerIP=$DEVELOP_IP)
+    //               """])
+    //             }
+    //           }
+    //         }
+    //       }
+    //     }
 
 
 
       // runing end to end aoutomation testing and publish test results 
-      // stage('aoutomation testing'){
-      //     when {
-      //       anyOf {
-      //         branch 'master'; branch 'develop'
-      //       }
-      //     }
-      //     steps {
-      //       script{
-      //         sh "apk --no-cache add curl"
-      //         // env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
-      //         env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-develop.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
-      //         if("${env.APP}" == '200'){
-      //       try {
-      //           sh ("docker run --name drive-outomation -e url=drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ qayesodot/drive-outomation")
+      stage('aoutomation testing'){
+          // when {
+          //   anyOf {
+          //     branch 'master'; branch 'develop'
+          //   }
+          // }
+          steps {
+          //   script{
+          //     sh "apk --no-cache add curl"
+          //     // env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
+          //     env.APP = sh (script: "curl -o -I -L -s -w \"%{http_code}\" drive-develop.northeurope.cloudapp.azure.com/", returnStdout: true).trim()
+          //     if("${env.APP}" == '200'){
+          //   try {
+          //       sh ("docker run --name drive-outomation -e url=drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ qayesodot/drive-outomation")
 
-      //           env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
-      //           sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
-      //           sh("cat ./reports.html")
+          //       env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
+          //       sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
+          //       sh("cat ./reports.html")
 
-      //           publishHTML target: [
-      //           allowMissing: false,
-      //           alwaysLinkToLastBuild: false,
-      //           keepAll: true,
-      //           reportDir: "./",
-      //           reportFiles: 'reports.html',
-      //           reportName: 'aoutomation test report'
-      //           ]          
-      //         }
-      //         catch(all){
-      //           env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
-      //           sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
-      //           sh("cat ./reports.html")
+          //       publishHTML target: [
+          //       allowMissing: false,
+          //       alwaysLinkToLastBuild: false,
+          //       keepAll: true,
+          //       reportDir: "./",
+          //       reportFiles: 'reports.html',
+          //       reportName: 'aoutomation test report'
+          //       ]          
+          //     }
+          //     catch(all){
+          //       env.CONTAINER_ID = sh (script: "docker ps -a -q --filter name=drive-outomation", returnStdout: true).trim()
+          //       sh ("docker cp ${env.CONTAINER_ID}:/app/reports/reports.html ./")
+          //       sh("cat ./reports.html")
 
-      //           publishHTML target: [
-      //           allowMissing: false,
-      //           alwaysLinkToLastBuild: false,
-      //           keepAll: true,
-      //           reportDir: "./",
-      //           reportFiles: 'reports.html',
-      //           reportName: 'aoutomation test report'
-      //           ]          
-      //         }
-      //       }
-      //       else{
-      //           sh ("echo drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ not found")
-      //       }
-      //     }
-      //   }
-      // } 
+          //       publishHTML target: [
+          //       allowMissing: false,
+          //       alwaysLinkToLastBuild: false,
+          //       keepAll: true,
+          //       reportDir: "./",
+          //       reportFiles: 'reports.html',
+          //       reportName: 'aoutomation test report'
+          //       ]          
+          //     }
+          //   }
+          //   else{
+          //       sh ("echo drive-${env.BRANCH_NAME}.northeurope.cloudapp.azure.com/ not found")
+          //   }
+          // }
+        }
+          post {
+          always {
+            // discordSend description: '**service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/blue/organizations/jenkins/'+env.JOB_FOR_URL+'/detail/'+env.BRANCH_FOR_URL+'/'+env.BUILD_NUMBER+'/artifacts', result: currentBuild.result, thumbnail: '', title: ' link to logs of end to end testing', webhookURL: env.discord   
+            discordSend description: '**service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/blue/organizations/jenkins/'+env.JOB_FOR_URL+'/detail/'+env.BRANCH_FOR_URL+'/'+env.BUILD_NUMBER+'/artifacts', result: currentBuild.result, thumbnail: '', title: ' link to logs of end to end testing', webhookURL: env.QA-DISCORD-CHANNEL   
+          }
+        }
+      }
+    } 
   }
 }   
