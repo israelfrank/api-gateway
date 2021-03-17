@@ -163,11 +163,11 @@ pipeline {
     // }
 
     stage('clone kd-helm reposetory and inject imagePullSecrets block, and replace image tag in common/deployments file'){
-      when {
-        anyOf {
-          branch 'master'; branch 'develop'
-        }
-      }
+      // when {
+      //   anyOf {
+      //     branch 'master'; branch 'develop'
+      //   }
+      // }
       steps {
          container('jnlp'){
           git branch: 'develop',
