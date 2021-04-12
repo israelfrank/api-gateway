@@ -136,11 +136,15 @@ pipeline {
         stage('An important reminder to update the env file for k8s secret') {
           steps {
             container('jnlp'){
-            discordSend description: '**An important reminder**: If there are changes in the \n environment variables and have not been updated,\n they need to be updated in the master-file \n or develop-file in link above \n, in addition there needs to be \n a re push to git, or re-run the gob from jenkins.'+ '\n    **updated service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/configfiles/', result: currentBuild.result, thumbnail: '', title: 'link to env file for k8s secret', webhookURL: env.QA_DISCORD_CHANNEL
+              sh 'echo reminder'
+            }
           }
-        }
-      }  
-
+          post {
+            always {
+              discordSend description: '**An important reminder**: If there are changes in the \n environment variables and have not been updated,\n they need to be updated in the master-file \n or develop-file in link above \n, in addition there needs to be \n a re push to git, or re-run the gob from jenkins.'+ '\n **Updated service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/configfiles/', result: currentBuild.result, thumbnail: '', title: 'link to env file for k8s secret', webhookURL: env.QA_DISCORD_CHANNEL
+            }
+          }
+        }  
     // stage('create nameSpace,secrets and configMap in the cluster') {
     //     when {
     //       anyOf {
