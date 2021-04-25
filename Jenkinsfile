@@ -133,18 +133,18 @@ pipeline {
       //     }     
 
     //  ---- CD section ----
-        stage('An important reminder to update the env file for k8s secret') {
-          steps {
-            container('jnlp'){
-              sh 'echo reminder'
-            }
-          }
-          post {
-            always {
-              discordSend description: '**Important reminder**: If there are changes in the environment variables and have not been updated, they need to be updated in the master/develop file in the link above,in addition a new push to git needs to be made, or re-run the gob from jenkins.'+ '\n **Updated service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/configfiles/', result: currentBuild.result, thumbnail: '', title: 'link to env file for k8s secret', webhookURL: env.discord
-            }
-          }
-        }  
+        // stage('An important reminder to update the env file for k8s secret') {
+        //   steps {
+        //     container('jnlp'){
+        //       sh 'echo reminder'
+        //     }
+        //   }
+        //   post {
+        //     always {
+        //       discordSend description: '**Important reminder**: If there are changes in the environment variables and have not been updated, they need to be updated in the master/develop file in the link above,in addition a new push to git needs to be made, or re-run the gob from jenkins.'+ '\n **Updated service**: '+ env.GIT_REPO_NAME + '\n **Build**:' + " " + env.BUILD_NUMBER + '\n **Branch**:' + " " + env.GIT_BRANCH + '\n **Status**:' + " " +  currentBuild.result + '\n \n \n **Commit ID**:'+ " " + env.GIT_SHORT_COMMIT + '\n **commit massage**:' + " " + env.GIT_COMMIT_MSG + '\n **commit email**:' + " " + env.GIT_COMMITTER_EMAIL, footer: '', image: '', link: 'http://jnk-devops-ci-cd.northeurope.cloudapp.azure.com/configfiles/', result: currentBuild.result, thumbnail: '', title: 'link to env file for k8s secret', webhookURL: env.discord
+        //     }
+        //   }
+        // }  
       stage('create nameSpace,secrets and configMap in the cluster') {
           when {
             anyOf {
@@ -191,8 +191,8 @@ pipeline {
               env.space1 = "- name: acr-secret"
               env.space2 = "imagePullSecrets:"
           }
-            sh "sed -i '29 i 2345678      ${env.space2}' ./z-helm/common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml"
-            sh "sed -i '30 i 2345678        ${env.space1}' ./z-helm/common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./common/templates/_deployment.yaml" 
+            sh "sed -i '29 i 2345678      ${env.space2}' ./z-helm/common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./z-helm/common/templates/_deployment.yaml"
+            sh "sed -i '30 i 2345678        ${env.space1}' ./z-helm/common/templates/_deployment.yaml && sed -i 's;2345678;'';g' ./z-helm/common/templates/_deployment.yaml" 
             // sh "sed -i 's;{{ .Values.image.tag }};${env.BRANCH_NAME};g' ./z-helm/common/templates/_deployment.yaml"
             sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/common/templates/_deployment.yaml"
             sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/gotenberg/templates/deployment.yaml"
