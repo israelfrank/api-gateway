@@ -212,7 +212,7 @@ pipeline {
 
 
     // deploy up using deploy.sh 
-    stage('deploy app')
+    stage('deploy app'){
         when {
           anyOf {
             branch 'master'; branch 'develop'
