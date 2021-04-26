@@ -205,7 +205,7 @@ pipeline {
         }
         post {
           always {
-              stash includes: '**/**/*', name: 'kdHelmRepo'
+              stash includes: '**/**/**/*', name: 'kdHelmRepo'
           } 
         }
       }
