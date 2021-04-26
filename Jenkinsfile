@@ -221,6 +221,7 @@ pipeline {
       steps {
         container('kube-helm-slave'){
           unstash 'kdHelmRepo'
+          sh "ls"
           sh "apk add jq"
           script{
             sh("helm init --client-only --skip-refresh")
@@ -230,14 +231,14 @@ pipeline {
             configFileProvider([configFile(fileId:'c610d729-1647-406f-bfdf-2ad8a5bebacd',variable:'MASTER')]){
               sh "cp ${env.MASTER} ./deploy.env"
               sh 'chmod +x ./deployment.sh'
-              sh "./deployment.sh -h --noacr -k"
+              sh "./deployment.sh -h -k"
             } 
           }
           else {
               configFileProvider([configFile(fileId:'c3891531-2afc-4d14-a514-1f24c5f75076',variable:'DEVELOP')]){
                 sh 'chmod +x ./deployment.sh'
                 sh "cp ${env.DEVELOP} ./deploy.env"
-                sh "./deployment.sh -h --noacr -k"
+                sh "./deployment.sh -h -k"
             } 
           }
           }
