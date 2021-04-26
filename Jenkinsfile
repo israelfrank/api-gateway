@@ -221,6 +221,7 @@ pipeline {
       steps {
         container('kube-helm-slave'){
           unstash 'kdHelmRepo'
+          sh "apk add jq"
           script{
             sh("helm init --client-only --skip-refresh")
             sh("helm repo rm stable")
