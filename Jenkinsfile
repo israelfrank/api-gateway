@@ -206,46 +206,47 @@ pipeline {
         post {
           always {
               stash includes: '**/**/*', name: 'kdHelmRepo'
-              stash includes: '**/', name: 'kdHelmRepo-2'
+              stash includes: '/*', name: 'kdHelmRepo-2'
           } 
         }
       }
 
 
     // deploy up using deploy.sh 
-    // stage('deploy app'){
-    //     when {
-    //       anyOf {
-    //         branch 'master'; branch 'develop'
-    //       }
-    //     }
-    //   steps {
-    //     container('kube-helm-slave'){
-    //       unstash 'kdHelmRepo'
-    //       sh "ls"
-    //       sh "apk add jq"
-    //       script{
-    //         sh("helm init --client-only --skip-refresh")
-    //         sh("helm repo rm stable")
-    //         sh("helm repo add stable https://charts.helm.sh/stable") 
-    //       if(env.BRANCH_NAME == 'master'){ 
-    //         configFileProvider([configFile(fileId:'c610d729-1647-406f-bfdf-2ad8a5bebacd',variable:'MASTER')]){
-    //           sh "cp ${env.MASTER} ./deploy.env"
-    //           sh 'chmod +x ./deployment.sh'
-    //           sh "./deployment.sh -h -k"
-    //         } 
-    //       }
-    //       else {
-    //           configFileProvider([configFile(fileId:'c3891531-2afc-4d14-a514-1f24c5f75076',variable:'DEVELOP')]){
-    //             sh 'chmod +x ./deployment.sh'
-    //             sh "cp ${env.DEVELOP} ./deploy.env"
-    //             sh "./deployment.sh -h -k"
-    //         } 
-    //       }
-    //       }
-    //     }
-    //   }
-    // }
+    stage('deploy app'){
+        when {
+          anyOf {
+            branch 'master'; branch 'develop'
+          }
+        }
+      steps {
+        container('kube-helm-slave'){
+          unstash 'kdHelmRepo'
+          sh "ls"
+          sh "find . -type f | wc -l"
+          sh "apk add jq"
+          script{
+            sh("helm init --client-only --skip-refresh")
+            sh("helm repo rm stable")
+            sh("helm repo add stable https://charts.helm.sh/stable") 
+          if(env.BRANCH_NAME == 'master'){ 
+            configFileProvider([configFile(fileId:'c610d729-1647-406f-bfdf-2ad8a5bebacd',variable:'MASTER')]){
+              sh "cp ${env.MASTER} ./deploy.env"
+              sh 'chmod +x ./deployment.sh'
+              sh "./deployment.sh -h -k"
+            } 
+          }
+          else {
+              configFileProvider([configFile(fileId:'c3891531-2afc-4d14-a514-1f24c5f75076',variable:'DEVELOP')]){
+                sh 'chmod +x ./deployment.sh'
+                sh "cp ${env.DEVELOP} ./deploy.env"
+                sh "./deployment.sh -h -k"
+            } 
+          }
+          }
+        }
+      }
+    }
     //this stage update the helm-chart packages and deploy or upgrade the drive-app to k8s , depends if drive-app is already deployed on the cluster 
     //   stage('deploy app'){
     //     when {
