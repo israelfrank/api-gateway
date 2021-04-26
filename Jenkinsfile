@@ -239,6 +239,7 @@ pipeline {
               configFileProvider([configFile(fileId:'c3891531-2afc-4d14-a514-1f24c5f75076',variable:'DEVELOP')]){
                 sh 'chmod +x ./deployment.sh'
                 sh "cp ${env.DEVELOP} ./deploy.env"
+                env.JSON_FILE = "services.dev.json"
                 sh "ls"
                 sh "cat ./deploy.env"
                 sh "./deployment.sh -h -k"
