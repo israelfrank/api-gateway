@@ -221,9 +221,8 @@ pipeline {
       steps {
         container('kube-helm-slave'){
           unstash 'kdHelmRepo'
-          sh "ls"
-          sh "find . -type f | wc -l"
           sh "apk add jq"
+          sh "apk add --update coreutils"
           script{
             sh("helm init --client-only --skip-refresh")
             sh("helm repo rm stable")
@@ -239,8 +238,6 @@ pipeline {
               configFileProvider([configFile(fileId:'c3891531-2afc-4d14-a514-1f24c5f75076',variable:'DEVELOP')]){
                 sh 'chmod +x ./deployment.sh'
                 sh "cp ${env.DEVELOP} ./deploy.env"
-                env.JSON_FILE = "services.dev.json"
-                sh "ls"
                 sh "cat ./deploy.env"
                 sh "./deployment.sh -h -k"
             } 
