@@ -166,7 +166,7 @@ pipeline {
               }
               else{
                 configFileProvider([configFile(fileId:'abda1ce7-3925-4759-88a7-5163bdb44382',variable:'DEVELOP_CONFIG_FILE')]){
-                    sh ("kubectl apply -f ${env.DEVELOP_CONFIG_FILE}")  
+                    // sh ("kubectl apply -f ${env.DEVELOP_CONFIG_FILE}")  
                 }
               }
             }
