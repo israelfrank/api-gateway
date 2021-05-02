@@ -166,7 +166,7 @@ pipeline {
               }
               else{
                 configFileProvider([configFile(fileId:'abda1ce7-3925-4759-88a7-5163bdb44382',variable:'DEVELOP_CONFIG_FILE')]){
-                    // sh ("kubectl apply -f ${env.DEVELOP_CONFIG_FILE}")  
+                     sh ("kubectl apply -f ${env.DEVELOP_CONFIG_FILE}")  
                 }
               }
             }
@@ -196,11 +196,11 @@ pipeline {
             // sh "sed -i 's;{{ .Values.image.tag }};${env.BRANCH_NAME};g' ./z-helm/common/templates/_deployment.yaml"
             sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/common/templates/_deployment.yaml"
             sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/gotenberg/templates/deployment.yaml"
-            sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/rabbitmq/templates/deployment.yaml"
+            // sh "sed -i 's;apps/v1beta2;apps/v1;g' ./z-helm/rabbitmq/templates/deployment.yaml"
             sh "sed -i 's;- path: /api/;- path: /api-gotenberg/;g' ./z-helm/gotenberg/templates/ingress.yaml"
             sh 'cat ./z-helm/common/templates/_deployment.yaml' 
             sh 'cat ./z-helm/gotenberg/templates/deployment.yaml'
-            sh 'cat ./z-helm/rabbitmq/templates/deployment.yaml'
+            // sh 'cat ./z-helm/rabbitmq/templates/deployment.yaml'
           }
         }
         post {
