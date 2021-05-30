@@ -239,9 +239,7 @@ pipeline {
                 sh 'chmod +x ./deployment.sh'
                 sh "cp ${env.DEVELOP} ./deploy.env"
                 sh "cat ./deploy.env"
-                sh "./deployment.sh -h -k"
-            } 
-          }
+                sh "./deployment.sh -h -k" 
           }
         }
       }
